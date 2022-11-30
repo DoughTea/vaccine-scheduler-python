@@ -204,10 +204,10 @@ def login_caregiver(tokens):
 def search_caregiver_schedule(tokens):
 
     # check 1: Insure they are logged in
-    # if ((current_caregiver is None and current_patient is not None) or (current_caregiver is not None and current_patient is None)):
-    #     print("No User logged in.")
-    #     print("Please log in first.")
-    #     return
+    if current_caregiver is None or current_patient is None:
+        print("No User logged in.")
+        print("Please log in first.")
+        return
 
     # check 2: The number of tokens should be 2
     if len(tokens) != 2:
