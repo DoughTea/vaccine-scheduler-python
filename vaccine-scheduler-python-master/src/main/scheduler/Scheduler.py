@@ -204,28 +204,45 @@ def login_caregiver(tokens):
 def search_caregiver_schedule(tokens):
 
     # check 1: Insure they are logged in
-    if current_caregiver is None or current_patient is None:
-        print("No User logged in.")
-        print("Please log in first.")
-        return
+    # if ((current_caregiver is None and current_patient is not None) or (current_caregiver is not None and current_patient is None)):
+    #     print("No User logged in.")
+    #     print("Please log in first.")
+    #     return
 
     # check 2: The number of tokens should be 2
     if len(tokens) != 2:
         print("Schedule search failed.")
         return
 
+    # assume input is hyphenated in the format mm-dd-yyyy
     date = tokens[1]
+    date_tokens = date.split("-")
+    month = int(date_tokens[0])
+    day = int(date_tokens[1])
+    year = int(date_tokens[2])
 
+    # check 3: check if the date is valid and get the available dates
     try:
-        avaliableDates = Caregiver(username).get()
+        date = datetime.datetime(year, month, day)
+        avaliableDates = Caregiver(date).get_availability(date)
     except pymssql.Error as e:
-        print("Login failed.")
+        print("Fetchings schedule failed.")
         print("Db-Error:", e)
         quit()
+    except ValueError:
+        print("Please enter a valid date!")
+        return
     except Exception as e:
-        print("Login failed.")
+        print("Error occurred when fetching availability")
         print("Error:", e)
         return
+
+    # check 4: check if dates are returned
+    if avaliableDates is None:
+        print("Schedule search failed.")
+    else:
+        print("Schedule search successful.")
+        print(avaliableDates)
 
 
 
@@ -298,8 +315,8 @@ def add_doses(tokens):
     vaccine = None
     try:
         vaccine = Vaccine(vaccine_name, doses).get()
-    except pymssql.Error as e:
         print("Error occurred when adding doses")
+    except pymssql.Error as e:
         print("Db-Error:", e)
         quit()
     except Exception as e:

@@ -81,3 +81,24 @@ class Caregiver:
             raise
         finally:
             cm.close_connection()
+
+    def get_availability(self, date):
+        cm = ConnectionManager()
+        conn = cm.create_connection()
+        cursor = conn.cursor(as_dict=True)
+
+        get_availability = "SELECT Username, Time FROM Availabilities WHERE Time = %s ;"
+        try:
+            cursor.execute(get_availability, date)
+
+            # Saved values
+            for row in cursor:
+                date += row
+            return date
+
+        except pymssql.Error:
+            print("Error occurred when retrieving caregiver availability")
+            print("Check that date is in the correct format")
+            raise
+        finally:
+            cm.close_connection()
